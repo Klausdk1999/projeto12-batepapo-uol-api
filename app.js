@@ -3,6 +3,7 @@ import cors from 'cors';
 import dayjs from 'dayjs';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
+import { useLinkClickHandler } from 'react-router-dom';
 
 dotenv.config();
 
@@ -88,5 +89,18 @@ app.get("/messages", (req, res) => {
     });
 });
 
+app.post("/status", (req, res) => {
+    const { user } = req.headers;
+    const promise = db.collection('participants').find({name:user}).toArray();
+    promise.then(userdata => {
+       if(userdata){
+        //const participant = { $set:{ lastStatus: Date.now()}};
+        db.collection('participants').updateOne({name:user},{ $set:{ lastStatus: Date.now()}});
+        res.sendStatus(201);
+       }else{
+        res.sendStatus(404);
+       }
+    });
+});
 
 app.listen(5000);
